@@ -28,7 +28,7 @@ async def generate_assessment_question(job_role: str) -> str:
         return "Error: Groq client not initialized."
     try:
         completion = await client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": ASSESSMENT_GENERATOR_SYSTEM_PROMPT},
                 {"role": "user", "content": get_assessment_prompt(job_role)}
@@ -55,7 +55,7 @@ async def evaluate_candidate_answer(question: str, answer: str, skill: str) -> d
 
     try:
         completion = await client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             # This is a powerful feature that FORCES the LLM to output valid JSON
             response_format={"type": "json_object"}, 
             messages=[
