@@ -21,15 +21,20 @@ class AssessmentResponse(BaseModel):
     question: str = Field(..., example="Write a Python function to...")
 
 
-# --- API Endpoint for /generate (Existing) ---
+# --- API Endpoint for /generate (NOW FIXED) ---
 @router.post("/generate", response_model=AssessmentResponse)
 async def generate_assessment(request: AssessmentRequest):
-    question = await llm_utils.generate_assessment_question(request.role)
+    """
+    Generates a new assessment question based on a job role.
+    """
+    # Call the AI function from our ai_engine
+    question = llm_utils.generate_assessment_question(request.role) # <-- REMOVED AWAIT
+    
     return AssessmentResponse(question=question)
 
 
 # --- --------------------------------------------------- ---
-# --- ADD THIS NEW CODE FOR THE /evaluate ENDPOINT ---
+# --- CODE FOR THE /evaluate ENDPOINT ---
 # --- --------------------------------------------------- ---
 
 # --- Pydantic Models for /evaluate (New) ---
@@ -44,14 +49,14 @@ class EvaluationResponse(BaseModel):
     feedback: str = Field(..., example="Good approach, minor syntax issues.")
 
 
-# --- API Endpoint for /evaluate (New) ---
+# --- API Endpoint for /evaluate (NOW FIXED) ---
 @router.post("/evaluate", response_model=EvaluationResponse)
 async def evaluate_assessment(request: EvaluationRequest):
     """
     Evaluates a candidate's answer using the AI grader.
     """
     # Call the new AI function from our ai_engine
-    evaluation_dict = await llm_utils.evaluate_candidate_answer(
+    evaluation_dict = llm_utils.evaluate_candidate_answer( # <-- REMOVED AWAIT
         question=request.question,
         answer=request.answer,
         skill=request.skill

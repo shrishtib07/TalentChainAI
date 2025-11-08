@@ -22,12 +22,15 @@ except Exception as e:
     print(f"Error initializing Groq/OpenAI client: {e}")
     client = None
 
-# --- This is your existing function ---
-async def generate_assessment_question(job_role: str) -> str:
+# --- This is your existing function (NOW FIXED) ---
+def generate_assessment_question(job_role: str) -> str:  # <-- REMOVED ASYNC
+    """
+    Calls the Groq API to generate a unique assessment question.
+    """
     if not client:
         return "Error: Groq client not initialized."
     try:
-        completion = await client.chat.completions.create(
+        completion = client.chat.completions.create(  # <-- REMOVED AWAIT
             model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": ASSESSMENT_GENERATOR_SYSTEM_PROMPT},
@@ -43,10 +46,9 @@ async def generate_assessment_question(job_role: str) -> str:
 
 
 # --- --------------------------------------------------- ---
-# --- ADD THIS NEW FUNCTION FOR THE EVALUATOR ---
+# --- THIS FUNCTION FOR THE EVALUATOR (NOW FIXED) ---
 # --- --------------------------------------------------- ---
-
-async def evaluate_candidate_answer(question: str, answer: str, skill: str) -> dict:
+def evaluate_candidate_answer(question: str, answer: str, skill: str) -> dict: # <-- REMOVED ASYNC
     """
     Calls the Groq API to evaluate a candidate's answer and return JSON.
     """
@@ -54,7 +56,7 @@ async def evaluate_candidate_answer(question: str, answer: str, skill: str) -> d
         return {"error": "Groq client not initialized."}
 
     try:
-        completion = await client.chat.completions.create(
+        completion = client.chat.completions.create( # <-- REMOVED AWAIT
             model="llama-3.1-8b-instant",
             # This is a powerful feature that FORCES the LLM to output valid JSON
             response_format={"type": "json_object"}, 
