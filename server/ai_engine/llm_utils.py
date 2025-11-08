@@ -6,8 +6,10 @@ from openai import OpenAI
 from .prompts import (
     ASSESSMENT_GENERATOR_SYSTEM_PROMPT, 
     get_assessment_prompt,
-    EVALUATOR_SYSTEM_PROMPT,  # <-- Import new prompt
-    get_evaluation_prompt   # <-- Import new prompt
+    EVALUATOR_SYSTEM_PROMPT,  
+    get_evaluation_prompt,   
+    RESUME_ANALYZER_SYSTEM_PROMPT,  
+    get_resume_analysis_prompt    
 )
 
 # Your existing client initialization (connects to Groq)
@@ -74,3 +76,28 @@ def evaluate_candidate_answer(question: str, answer: str, skill: str) -> dict: #
     except Exception as e:
         print(f"Error calling Groq API (evaluate): {e}")
         return {"error": "Could not evaluate answer."}
+    
+def analyze_resume_text(resume_text: str) -> dict:
+    """
+    Calls the Groq API to analyze resume text and extract skills.
+    """
+    if not client:
+        return {"error": "Groq client not initialized."}
+    
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            response_format={"type": "json_object"}, 
+            messages=[
+                {"role": "system", "content": RESUME_ANALYZER_SYSTEM_PROMPT},
+                {"role": "user", "content": get_resume_analysis_prompt(resume_text)}
+            ],
+            temperature=0.0 # We want a factual, deterministic extraction
+        )
+        
+        response_content = completion.choices[0].message.content
+        return json.loads(response_content)
+
+    except Exception as e:
+        print(f"Error calling Groq API (resume): {e}")
+        return {"error": "Could not analyze resume."}
