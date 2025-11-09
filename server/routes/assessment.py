@@ -65,3 +65,18 @@ async def evaluate_assessment(request: EvaluationRequest):
     # Return the dictionary, which FastAPI will validate
     # against the EvaluationResponse model.
     return evaluation_dict
+
+# 1. A model for a single MCQ
+class MCQ(BaseModel):
+    question: str
+    options: list[str] = Field(..., max_items=4)
+    correct_answer: str
+
+# 2. The request body our new endpoint will expect
+class SkillsRequest(BaseModel):
+    skills: list[str] = Field(..., example=["Python", "FastAPI"])
+
+# 3. The final response model with 5 MCQs and 2 coding questions
+class QuestionSetResponse(BaseModel):
+    mcqs: list[MCQ] = Field(..., max_items=5)
+    coding_questions: list[str] = Field(..., max_items=2)
