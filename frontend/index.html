@@ -5,64 +5,379 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TalentChain AI Tester</title>
     <style>
-        body { font-family: sans-serif; margin: 2em; background-color: #2b2b2b; color: #f0f0f0; }
-        h1, h3 { color: #4CAF50; }
-        textarea { width: 100%; height: 60px; border-radius: 5px; background-color: #3c3c3c; color: #f0f0f0; border: 1px solid #555; }
-        input[type="file"] { color: #f0f0f0; }
-        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 5px; cursor: pointer; }
-        button:hover { background-color: #45a049; }
-        pre { background-color: #1e1e1e; padding: 1em; border-radius: 5px; min-height: 50px; white-space: pre-wrap; word-wrap: break-word; }
-        hr { border: 1px solid #555; margin: 2.5em 0; }
-        #test-container { background-color: #1e1e1e; padding: 1em; border-radius: 5px; display: none; }
-        .mcq-question { background-color: #2b2b2b; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-        .mcq-question h4 { margin-top: 0; }
-        .mcq-option { display: block; margin: 5px 0; }
-        .coding-question { background-color: #2b2b2b; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-        .code-editor { width: 98%; height: 200px; background-color: #1a1a1a; color: #f0f0f0; border: 1px solid #555; border-radius: 5px; font-family: monospace; font-size: 14px; }
-        #submit-test-btn { background-color: #f44336; }
-        #final-results-container { display: none; background-color: #1e1e1e; padding: 1em; border-radius: 5px; } 
-        
-        /* --- NEW CSS FOR RESULTS --- */
-        #final-results-display h4 { color: #4CAF50; }
-        .result-block { background-color: #2b2b2b; padding: 15px; margin-bottom: 15px; border-radius: 5px; }
-        .result-block p { margin: 5px 0; }
-        .result-block .question { font-weight: bold; }
-        .result-block .correct-answer { color: #4CAF50; } /* Green */
-        .result-block .incorrect-answer { color: #f44336; } /* Red */
-        .result-block .feedback { font-style: italic; color: #aaa; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #10b981 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(16, 185, 129, 0.3);
+        }
+
+        .card h3 {
+            color: #10b981;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 50%;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Form Elements */
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-upload-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            width: 100%;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.6);
+            border: 2px dashed rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: #94a3b8;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .file-upload-btn:hover {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+
+        .file-name {
+            margin-top: 0.5rem;
+            color: #10b981;
+            font-size: 0.9rem;
+        }
+
+        /* Buttons */
+        button {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #submit-test-btn {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            width: 100%;
+            margin-top: 2rem;
+        }
+
+        #submit-test-btn:hover {
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        /* Response/Output Displays */
+        pre {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-top: 1rem;
+        }
+
+        /* Test Container */
+        #test-container {
+            display: none;
+        }
+
+        .mcq-question, .coding-question {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .mcq-question h4, .coding-question h4 {
+            color: #3b82f6;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .mcq-option {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mcq-option:hover {
+            background: rgba(16, 185, 129, 0.1);
+            transform: translateX(4px);
+        }
+
+        .mcq-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .code-editor {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(10, 15, 30, 0.8);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        /* Results */
+        #final-results-container {
+            display: none;
+        }
+
+        .result-block {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #10b981;
+        }
+
+        .result-block .question {
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+
+        .result-block p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        .correct-answer {
+            color: #10b981;
+            font-weight: 500;
+        }
+
+        .incorrect-answer {
+            color: #ef4444;
+            font-weight: 500;
+        }
+
+        .feedback {
+            color: #94a3b8;
+            font-style: italic;
+            margin-top: 0.5rem;
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Divider */
+        hr {
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            margin: 3rem 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
-    <h1>TalentChain AI Frontend</h1>
-    
-    <h3>1. Generate Question by Role</h3>
-    <textarea id="roleInput" placeholder="e.g., Senior Python Developer"></textarea>
-    <br><br>
-    <button id="generateButton">Generate Question</button>
-    <h3>Response:</h3>
-    <pre id="generateResponse">...</pre>
+    <div class="container">
+        <header>
+            <h1>TalentChain AI</h1>
+            <p class="subtitle">Advanced Talent Assessment Platform</p>
+        </header>
 
-    <hr>
-    
-    <h3>2. Generate Full Test from Resume (PDF)</h3>
-    <input type="file" id="resumeInput" accept=".pdf">
-    <br><br>
-    <button id="analyzeButton">Analyze Resume & Generate Test</button>
-    
-    <div id="test-container">
-        <h3>Generated Test</h3>
-        <div id="mcq-container"></div>
-        <div id="coding-container"></div>
-        <button id="submit-test-btn">Submit Test</button>
-    </div>
-    
-    <pre id="analyzeErrorResponse"></pre>
+        <div class="card">
+            <h3><span class="card-number">1</span> Generate Question by Role</h3>
+            <textarea id="roleInput" placeholder="e.g., Senior Python Developer" rows="3"></textarea>
+            <br><br>
+            <button id="generateButton">Generate Question</button>
+            <pre id="generateResponse">Response will appear here...</pre>
+        </div>
 
-    <div id="final-results-container">
-        <h3>Your Results:</h3>
-        <div id="final-results-display"></div>
+        <hr>
+
+        <div class="card">
+            <h3><span class="card-number">2</span> Generate Full Test from Resume</h3>
+            <div class="file-upload-wrapper">
+                <label for="resumeInput" class="file-upload-btn">
+                    <span>📄</span>
+                    <span>Click to upload PDF resume</span>
+                </label>
+                <input type="file" id="resumeInput" accept=".pdf">
+                <div class="file-name" id="fileName"></div>
+            </div>
+            <br><br>
+            <button id="analyzeButton">Analyze Resume & Generate Test</button>
+            <pre id="analyzeErrorResponse"></pre>
+        </div>
+
+        <div id="test-container" class="card">
+            <h3>📝 Your Assessment</h3>
+            <div id="mcq-container"></div>
+            <div id="coding-container"></div>
+            <button id="submit-test-btn">Submit Test</button>
+        </div>
+
+        <div id="final-results-container" class="card">
+            <h3>🎯 Your Results</h3>
+            <div id="final-results-display"></div>
+        </div>
     </div>
 
     <script src="script.js"></script>
+    <script>
+        // File upload display
+        document.getElementById('resumeInput').addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                document.getElementById('fileName').textContent = `Selected: ${fileName}`;
+            }
+        });
+    </script>
 </body>
 </html>
