@@ -22,19 +22,18 @@
     <textarea id="roleInput" placeholder="e.g., Senior Python Developer"></textarea>
     <br><br>
     <button id="generateButton">Generate Question</button>
-    
-    <h3>Response from Groq (via Backend):</h3>
-    <pre id="generateResponse">Click the button to see the response...</pre>
+    <h3>Response:</h3>
+    <pre id="generateResponse">...</pre>
 
     <hr>
     
-    <h3>2. Analyze Resume (PDF)</h3>
+    <h3>2. Generate Full Test from Resume (PDF)</h3>
     <input type="file" id="resumeInput" accept=".pdf">
     <br><br>
-    <button id="analyzeButton">Analyze Resume</button>
+    <button id="analyzeButton">Analyze Resume & Generate Test</button>
+    <h3>Generated Test (MCQs and Coding Questions):</h3>
+    <pre id="analyzeResponse">Upload a PDF and click the button...</pre>
 
-    <h3>Extracted Skills:</h3>
-    <pre id="analyzeResponse">Upload a PDF to see the AI's analysis...</pre>
     <script src="script.js"></script>
 </body>
 </html>
