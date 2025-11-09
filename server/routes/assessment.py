@@ -1,6 +1,6 @@
 # routes/assessment.py
 
-from fastapi import APIRouter
+from fastapi import APIRouter,HTTPException
 from pydantic import BaseModel, Field
 from ai_engine import llm_utils # Import our LLM utility
 
@@ -80,3 +80,21 @@ class SkillsRequest(BaseModel):
 class QuestionSetResponse(BaseModel):
     mcqs: list[MCQ] = Field(..., max_items=5)
     coding_questions: list[str] = Field(..., max_items=2)
+
+@router.post("/generate_from_skills", response_model=QuestionSetResponse)
+async def generate_questions_from_skills(request: SkillsRequest):
+    """
+    Generates a full set of MCQs and coding questions from a list of skills.
+    """
+    skills_list = request.skills
+    if not skills_list:
+        raise HTTPException(status_code=400, detail="No skills provided")
+
+    # Call the new AI function
+    question_set_dict = llm_utils.generate_question_set(skills_list)
+    
+    if "error" in question_set_dict:
+        raise HTTPException(status_code=500, detail=question_set_dict["error"])
+
+    # FastAPI will automatically validate the dict against our QuestionSetResponse
+    return question_set_dict
