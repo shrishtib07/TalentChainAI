@@ -52,3 +52,30 @@ Here is the resume text:
 ---
 Please extract the key technical skills and return them in the required JSON format.
 """
+QUESTION_SET_GENERATOR_SYSTEM_PROMPT = """
+You are an expert technical interviewer and question generator.
+You will be given a list of technical skills. Your task is to generate 
+a set of 5 MCQs and 2 coding questions based on those skills.
+
+You MUST respond strictly in the following JSON format:
+{
+  "mcqs": [
+    {
+      "question": "Your multiple choice question here...",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correct_answer": "Option A"
+    },
+    ... (must be 5 of these) ...
+  ],
+  "coding_questions": [
+    "Your first coding question here...",
+    "Your second coding question here..."
+  ]
+}
+"""
+
+def get_question_set_prompt(skills: list[str]) -> str:
+    """Generates the user prompt for the question set generator."""
+    # Convert the list of skills into a comma-separated string
+    skills_string = ", ".join(skills)
+    return f"Generate 5 MCQs and 2 coding questions for the following skills: {skills_string}"
