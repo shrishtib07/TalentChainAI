@@ -36,16 +36,25 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- ------------------------------------------ ---
     const resumeInput = document.getElementById('resumeInput');
     const analyzeButton = document.getElementById('analyzeButton');
-    const analyzeResponse = document.getElementById('analyzeResponse');
+    const analyzeErrorResponse = document.getElementById('analyzeErrorResponse');
+    
+    const testContainer = document.getElementById('test-container');
+    const mcqContainer = document.getElementById('mcq-container');
+    const codingContainer = document.getElementById('coding-container');
 
     analyzeButton.addEventListener('click', async () => {
         const file = resumeInput.files[0];
         if (!file) {
-            analyzeResponse.textContent = 'Please select a PDF file first.';
+            analyzeErrorResponse.textContent = 'Please select a PDF file first.';
             return;
         }
+        
+        // Clear old results and show "loading"
+        analyzeErrorResponse.textContent = 'Step 1/2: Analyzing resume...';
+        testContainer.style.display = 'none';
+        mcqContainer.innerHTML = '';
+        codingContainer.innerHTML = '';
 
-        analyzeResponse.textContent = 'Step 1/2: Analyzing resume...';
         const formData = new FormData();
         formData.append('file', file);
 
@@ -61,21 +70,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(`Resume Analysis Failed: ${errData.detail}`);
             }
 
-            const skillsData = await analyzeRes.json(); // e.g., {"skills": ["Python", "SQL"]}
+            const skillsData = await analyzeRes.json();
             const skills = skillsData.skills;
 
             if (!skills || skills.length === 0) {
-                analyzeResponse.textContent = 'No technical skills found in resume.';
+                analyzeErrorResponse.textContent = 'No technical skills found in resume.';
                 return;
             }
 
-            analyzeResponse.textContent = `Step 2/2: Found skills (${skills.join(', ')}). Generating test...`;
+            analyzeErrorResponse.textContent = `Step 2/2: Found skills (${skills.join(', ')}). Generating test...`;
 
             // --- STEP 2: Call /generate_from_skills endpoint ---
             const questionsRes = await fetch('http://127.0.0.1:8000/api/v1/assessment/generate_from_skills', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ skills: skills }), // Send the skills we just got
+                body: JSON.stringify({ skills: skills }),
             });
 
             if (!questionsRes.ok) {
@@ -85,13 +94,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const questionsData = await questionsRes.json();
 
-            // 3. Display the final, formatted JSON
-            // (JSON.stringify with 'null, 2' formats it nicely)
-            analyzeResponse.textContent = JSON.stringify(questionsData, null, 2);
+            // --- STEP 3: Render the test on the page ---
+            analyzeErrorResponse.textContent = ''; // Clear errors
+            renderTest(questionsData); // Call the new render function
+            testContainer.style.display = 'block'; // Show the test
 
         } catch (error) {
             console.error('Error in analysis/generation chain:', error);
-            analyzeResponse.textContent = `Error: ${error.message}. Is your backend server running?`;
+            analyzeErrorResponse.textContent = `Error: ${error.message}. Is your backend server running?`;
         }
     });
+
+    /**
+     * NEW FUNCTION: Renders the test from the JSON data.
+     */
+    function renderTest(testData) {
+        // 1. Render MCQs
+        let mcqHtml = '<h3>Multiple Choice Questions:</h3>';
+        testData.mcqs.forEach((mcq, index) => {
+            mcqHtml += `
+                <div class="mcq-question">
+                    <h4>${index + 1}. ${mcq.question}</h4>
+                    ${mcq.options.map((option, i) => `
+                        <label class="mcq-option">
+                            <input type="radio" name="mcq-${index}" value="${option}">
+                            ${option}
+                        </label>
+                    `).join('')}
+                </div>
+            `;
+        });
+        mcqContainer.innerHTML = mcqHtml;
+
+        // 2. Render Coding Questions
+        let codingHtml = '<h3>Coding Questions:</h3>';
+        testData.coding_questions.forEach((question, index) => {
+            codingHtml += `
+                <div class="coding-question">
+                    <h4>${index + 1}. ${question}</h4>
+                    <textarea class="code-editor" placeholder="Write your code here..."></textarea>
+                </div>
+            `;
+        });
+        codingContainer.innerHTML = codingHtml;
+    }
 });

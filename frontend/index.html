@@ -13,6 +13,41 @@
         button:hover { background-color: #45a049; }
         pre { background-color: #1e1e1e; padding: 1em; border-radius: 5px; min-height: 50px; white-space: pre-wrap; word-wrap: break-word; }
         hr { border: 1px solid #555; margin: 2.5em 0; }
+
+        /* --- New CSS for the Test --- */
+        #test-container { 
+            background-color: #1e1e1e; 
+            padding: 1em; 
+            border-radius: 5px; 
+            display: none; /* Hidden by default */
+        }
+        .mcq-question {
+            background-color: #2b2b2b;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .mcq-question h4 { margin-top: 0; }
+        .mcq-option { display: block; margin: 5px 0; }
+        .coding-question {
+            background-color: #2b2b2b;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .code-editor {
+            width: 98%;
+            height: 200px;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            border: 1px solid #555;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        #submit-test-btn {
+            background-color: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -31,8 +66,19 @@
     <input type="file" id="resumeInput" accept=".pdf">
     <br><br>
     <button id="analyzeButton">Analyze Resume & Generate Test</button>
-    <h3>Generated Test (MCQs and Coding Questions):</h3>
-    <pre id="analyzeResponse">Upload a PDF and click the button...</pre>
+    
+    <div id="test-container">
+        <h3>Generated Test</h3>
+        
+        <div id="mcq-container"></div>
+        
+        <div id="coding-container"></div>
+
+        <button id="submit-test-btn">Submit Test</button>
+    </div>
+    
+    <pre id="analyzeErrorResponse"></pre>
+
 
     <script src="script.js"></script>
 </body>
