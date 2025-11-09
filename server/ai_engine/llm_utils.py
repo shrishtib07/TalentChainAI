@@ -9,7 +9,9 @@ from .prompts import (
     EVALUATOR_SYSTEM_PROMPT,  
     get_evaluation_prompt,   
     RESUME_ANALYZER_SYSTEM_PROMPT,  
-    get_resume_analysis_prompt    
+    get_resume_analysis_prompt,    
+    QUESTION_SET_GENERATOR_SYSTEM_PROMPT, 
+    get_question_set_prompt
 )
 
 # Your existing client initialization (connects to Groq)
@@ -101,3 +103,28 @@ def analyze_resume_text(resume_text: str) -> dict:
     except Exception as e:
         print(f"Error calling Groq API (resume): {e}")
         return {"error": "Could not analyze resume."}
+
+def generate_question_set(skills: list[str]) -> dict:
+    """
+    Calls the Groq API to generate a full set of questions from a skill list.
+    """
+    if not client:
+        return {"error": "Groq client not initialized."}
+    
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            response_format={"type": "json_object"}, 
+            messages=[
+                {"role": "system", "content": QUESTION_SET_GENERATOR_SYSTEM_PROMPT},
+                {"role": "user", "content": get_question_set_prompt(skills)}
+            ],
+            temperature=0.5 # A bit of creativity
+        )
+        
+        response_content = completion.choices[0].message.content
+        return json.loads(response_content)
+
+    except Exception as e:
+        print(f"Error calling Groq API (question set): {e}")
+        return {"error": "Could not generate question set."}
